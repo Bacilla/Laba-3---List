@@ -27,7 +27,9 @@ void print_film_data() {
 
 // Прототипы функций
 int get_int();
-void add_to_end(List **ppStart, List **ppEnd);
+void add_to_end(List **ppEnd);
+void add_first(List **ppStart, List **ppEnd);
+void add_to_front(List **ppStart);
 Film fill_film_data();
 void print_all_data(List *start_p);
 
@@ -38,13 +40,15 @@ int main() {
     // Указатель на последний элемент списка (он всегда будет смещаться по мере добавления или удаления элементов)
     List *pEnd = NULL;
  
-    add_to_end(&pStart, &pEnd);
-    add_to_end(&pStart, &pEnd);
-    add_to_end(&pStart, &pEnd);
+    // Тесты
+    add_first(&pStart, &pEnd);
+    add_to_end(&pEnd);
 
     print_all_data(pStart);
 
+    add_to_front(&pStart);
 
+    print_all_data(pStart);
 
 
     return 0;
@@ -64,7 +68,7 @@ int get_int() {
 }
 
 // Функция добавляет новый элемент в конец списка
-void add_to_end(List **ppStart, List **ppEnd) {
+void add_to_end(List **ppEnd) {
     // Создание новой структуры Film
     Film new_film;
     // Заполнение структуры данными
@@ -75,20 +79,47 @@ void add_to_end(List **ppStart, List **ppEnd) {
     // Заполнение структуры данными
     (*new_element).next = NULL; // Т.к. элемент добавляется в конец списка
     (*new_element).data = new_film; // Заполняем элемент списка данными о фильме
+ 
+    // Cвязываем бывший последний элемент с новым последним элементом
+    (*ppEnd)->next = new_element; // Теперь бывший последний элемент(который хранился по адресу в переменной pEnd) больше не является последним
 
-   
-    // Если это не добавление первого элемента в список и указатель pEnd уже указывает на какой-то элемент,
-    // то связываем элемент, на который указывает указатель с новым последним элементом
-    if((*ppEnd) != NULL) {
-        (*ppEnd)->next = new_element; // Теперь бывший последний элемент(который хранился по адресу в переменной pEnd) больше не является последним
-    }
     // Переприсваиваем указатель на новый последний элемент 
     *ppEnd = new_element;
+}
 
-    // Если это первый элемент в списке - указатель начала списка теперь указывает на него
-    if((*ppStart) == NULL) {
-        *ppStart = new_element;
-    }
+// Функция для добавления первого элемента в список
+void add_first(List **ppStart, List **ppEnd) {
+    // Создание новой структуры Film
+    Film new_film;
+    // Заполнение структуры данными
+    new_film = fill_film_data();
+
+    // Создание нового элемента
+    List *new_element = malloc(sizeof(List));
+    // Заполнение структуры данными
+    (*new_element).next = NULL; 
+    (*new_element).data = new_film;
+
+    // Т.к. добавляется первый элемент в списке - указатели на начало списка и конец это один объект
+    *ppStart = new_element;
+    *ppEnd = new_element;
+}
+
+// Функция добавляет новый элемент в начало списка
+void add_to_front(List **ppStart) {
+    // Создание новой структуры Film
+    Film new_film;
+    // Заполнение структуры данными
+    new_film = fill_film_data();
+
+    // Создание нового элемента
+    List *new_element = malloc(sizeof(List));
+    // Заполнение структуры данными
+    (*new_element).next = *ppStart; // Указывает на бывший первый элемент в списке
+    (*new_element).data = new_film;
+
+    // Переприсваиваем указатель на новый первый элемент 
+    *ppStart = new_element;
 }
 
 // Функция создаёт новую структру Film и инициализирует её пользовательскими данными
@@ -136,7 +167,7 @@ void print_all_data(List *pStart) {
         printf("name:\t\t%s\n", (*temp).data.name);
         printf("session:\t%d\n", (*temp).data.session);
         printf("price:\t\t%d\n", (*temp).data.price);
-        printf("vievers:\t%d\n", (*temp).data.num_of_viewers);
+        printf("viewers:\t%d\n", (*temp).data.num_of_viewers);
         temp = (*temp).next;
         i++;
     }
