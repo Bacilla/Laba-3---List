@@ -25,18 +25,17 @@ int get_int();
 void add_to_end(List **ppEnd);
 void add_first(List **ppStart, List **ppEnd);
 void add_to_front(List **ppStart);
+void add_after(List **ppAdded, List **ppEnd);
 Film fill_film_data();
-void print_all_data(List *start_p);
 void show_commands();
 void remove_end(List **ppStart, List **ppEnd);
 void remove_front(List **ppStart, List **ppEnd);
+void remove_found(List **ppFound, List **ppPrev);
 void search_struct(List *pStart, List **ppFound);
 void print_search_res(int res);
 void print_search_fields();
-void add_after(List **ppAdded, List **ppEnd);
-
-
-
+void print_all_data(List *start_p);
+List *find_prev(List *pFound, List *pStart);
 
 
 int main() {
@@ -105,14 +104,25 @@ int main() {
                 }
                 switch (command2) {
                     case 1:
-                        add_after(&pFound, &pEnd);
-
-                    break;
+                        add_after(&pFound, &pEnd); // добавляем новый элемент после найденного
+                        break;
                     case 2:
-
-                    break;
+                        // Проверяем, не является ли найденный указатель указателем на первый или последний элемент в списке                             
+                        if(pFound == pStart) { // Если надо удалить первый элемент из списка
+                            remove_front(&pStart, &pEnd);
+                            break;
+                        }
+                        if(pFound == pEnd) { // Если надо удалить последний элемент из списка
+                            remove_end(&pStart, &pEnd);
+                            break;
+                        }
+                        
+                        // Находим предыдущий от найденного элемента
+                        List *pPrev = find_prev(pFound, pStart);
+                        // Если элемент не является ни первым, ни последним в списке
+                        remove_found(&pFound, &pPrev); // удаление найденного элемента
+                        break;
                 }
-
                 break;
             case 6:
                 print_all_data(pStart);
@@ -201,6 +211,29 @@ void remove_front(List **ppStart, List **ppEnd) {
     free(*ppStart);
     *ppStart = temp;
 }
+
+// Функция находит предыдущий, перед найденным, элемент
+List *find_prev(List *pFound, List *pStart) {
+    List *result = NULL;
+    List *temp = pStart;
+    while(temp != NULL) {
+        // Если следующий элемент это найденный элемент
+        if(temp->next == pFound) {
+            result = temp;
+            break;
+        }
+        temp = temp->next;
+    }
+    
+    return result;
+}
+
+// Функция удаляет найденный элемент
+void remove_found(List **ppFound, List **ppPrev) {
+    (*ppPrev)->next = (*ppFound)->next;
+    free(*ppFound);
+} 
+
 
 void search_struct(List *pStart, List **ppFound) {
     // Вывод список возможных полей для поиска
