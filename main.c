@@ -28,6 +28,7 @@ void add_to_front(List **ppStart);
 Film fill_film_data();
 void print_all_data(List *start_p);
 void show_commands();
+void remove_end(List **ppStart, List **ppEnd);
 
 
 int main() {
@@ -61,7 +62,8 @@ int main() {
                 }
                 break;
             case 3:
-                printf("not ready...\n");
+                printf("remove_end in progress...\n");
+                remove_end(&pStart, &pEnd);
                 break;
             case 4:
                 printf("not ready...\n");
@@ -75,13 +77,54 @@ int main() {
             case 7:
                 printf("goodbye ^W^\n");
                 exit(0);
+            default:
+                printf("Incorrect command.\n");
+                break;
         }
-
     }
-
-
     return 0;
 }
+
+
+// Функция удаляет последний элемент с конца списка
+void remove_end(List **ppStart, List **ppEnd) {
+    List *temp = *ppStart; // Копируем указатель на первый элемент в структуре
+    if((temp) == NULL) { // Если список пустой - выходим из функции
+        printf("Error, List is empty.\n");
+        return;
+    }
+    
+    int i = 0; // счетчик количества элементов в списке
+    // Находим кол-во элементов в списке
+    while(temp != NULL) {
+        temp = (*temp).next;
+        i++;
+    }
+
+    // Для теста 
+    printf("num of elements: %d\n", i);
+
+    temp = *ppStart; // Перед вторым проходом обновляем временный указатель, чтобы он опять указывал на первый элемент в списке
+    int j = 1; // Счетчик второго прохода по элементам
+    while(1) {
+        if(i == 1) { // Частный случай, когда в списке находится лишь один элемент
+            free(*ppEnd); // очищаем последний (и единственный) элемент 
+            // Возвращаем список в нулевое положение (когда нет ни одного элемента и указатела на 1й и последний элементы == NULL)
+            *ppEnd = NULL;
+            *ppStart = NULL;
+            break;
+        }
+        if(j == i - 1) { // j находит предпоследний элемент в списке(который послед удаления последнего станет новым последним элементом)
+            free(*ppEnd); // очищаем последний элемент
+            *ppEnd = temp; // указываем на новый последний элемент
+            (*ppEnd)->next = NULL;
+            break;
+        }
+        temp = (*temp).next;
+        j++;
+    }
+}
+
 
 
 // Функция получает от пользователя число типа int 
@@ -159,7 +202,7 @@ Film fill_film_data() {
     // Заполнение поля name
     printf("film name:");// scanf("%s", &new_film.name);
     char name[NAME_LENGTH] = {0};
-    if(fgets(name, NAME_LENGTH + 1, stdin) == NULL) {
+    if(fgets(name, NAME_LENGTH, stdin) == NULL) {
         printf("In \"fill_film_data\" function: Error in fgets()\n");
     }
     // Удаление символа '\n' из полученной строки
