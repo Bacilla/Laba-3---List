@@ -29,6 +29,8 @@ Film fill_film_data();
 void print_all_data(List *start_p);
 void show_commands();
 void remove_end(List **ppStart, List **ppEnd);
+void remove_front(List **ppStart, List **ppEnd);
+
 
 
 int main() {
@@ -66,7 +68,8 @@ int main() {
                 remove_end(&pStart, &pEnd);
                 break;
             case 4:
-                printf("not ready...\n");
+                printf("remove_front in progress...\n");
+                remove_front(&pStart, &pEnd);
                 break;
             case 5:
                 printf("not ready...\n");
@@ -123,6 +126,40 @@ void remove_end(List **ppStart, List **ppEnd) {
         temp = (*temp).next;
         j++;
     }
+}
+
+// Функция удаляем первый элемент из начала списка
+void remove_front(List **ppStart, List **ppEnd) {
+    List *temp = *ppStart;
+    if((temp) == NULL) { // Если список пустой - выходим из функции
+        printf("Error, List is empty.\n");
+        return;
+    }
+
+
+    // В данной функции нет необходимости значть кол-во элементов в списке, но используется исключительно для наглядности
+    int i = 0; // счетчик количества элементов в списке
+    // Находим кол-во элементов в списке
+    while(temp != NULL) {
+        temp = (*temp).next;
+        i++;
+    }
+    // Для теста 
+    printf("num of elements: %d\n", i);
+
+
+    // Если в списке находится один элемент
+    if((*ppStart)->next == NULL) {
+        free(*ppStart);
+        *ppStart = NULL;
+        *ppEnd = NULL;
+        return;
+    }
+
+    // Если в списке больше одного элемента
+    temp = (*ppStart)->next; // Запоминаем указатель на следующий после первого элемент
+    free(*ppStart);
+    *ppStart = temp;
 }
 
 
