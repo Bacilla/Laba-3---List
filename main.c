@@ -33,6 +33,8 @@ void remove_front(List **ppStart, List **ppEnd);
 void search_struct(List *pStart, List **ppFound);
 void print_search_res(int res);
 void print_search_fields();
+void add_after(List **ppAdded, List **ppEnd);
+
 
 
 
@@ -77,11 +79,38 @@ int main() {
                 remove_front(&pStart, &pEnd);
                 break;
             case 5:
-                List *pFound = NULL;
+                // Сразу проверяем не пустой ли список
+                if(pStart == NULL) {
+                    printf("Error, List is empty.\n");
+                    break;
+                }
+
+                List *pFound = NULL; // указатель на найденную структуру
                 printf("search_struct in progress...\n");
                 search_struct(pStart, &pFound);
-                if(pFound != NULL) {
-                    // делаем следующие действия: вставляем элемент после надйенной или удаляем найденную..
+                if(pFound == NULL) { // если структуру не удалось найти - не выполнять код дальше
+                    break;
+                }
+                // делаем следующие действия: вставляем элемент после найденной или удаляем найденную..
+
+                // После того, как элемент списка найден, выбор следующего действия
+                printf("\"1\": add after found\n");
+                printf("\"2\": removing found\n");
+                printf("command:");
+                // Ввод и обработка команды
+                int command2 = get_int();
+                if(command2 < 1 || command2 > 2) {
+                    printf("Incorrect command.\n");
+                    break;
+                }
+                switch (command2) {
+                    case 1:
+                        add_after(&pFound, &pEnd);
+
+                    break;
+                    case 2:
+
+                    break;
                 }
 
                 break;
@@ -214,7 +243,7 @@ void search_struct(List *pStart, List **ppFound) {
                 }
                 temp = temp->next;
             }
-            break;
+        break;
         // Поиск по полю session    
         case 2:
             printf("session:");
@@ -224,12 +253,13 @@ void search_struct(List *pStart, List **ppFound) {
             temp = pStart;
             while(temp != NULL) {
                 if(temp->data.session == session_val) {
+                    *ppFound = temp; // сохраняем указатель на найденный элемент списка
                     res = 1;
                     break;
                 }
                 temp = temp->next;
             }
-            break;
+        break;
         // Поиск по полю price      
         case 3:
             printf("price:");
@@ -239,37 +269,33 @@ void search_struct(List *pStart, List **ppFound) {
             temp = pStart;
             while(temp != NULL) {
                 if(temp->data.price == price_val) {
+                    *ppFound = temp; // сохраняем указатель на найденный элемент списка
                     res = 1;
                     break;
                 }
                 temp = temp->next;
             }
-            break;
+        break;
         // Поиск по полю num of viewers
         case 4:
-            break;
+            printf("viewers:");
+            int viewers_val = get_int();
+            
+            // Поиск введённого значения
+            temp = pStart;
+            while(temp != NULL) {
+                if(temp->data.num_of_viewers == viewers_val) {
+                    *ppFound = temp; // сохраняем указатель на найденный элемент списка
+                    res = 1;
+                    break;
+                }
+                temp = temp->next;
+            }
+        break;
     }
 
     // вывод сообщения о результатах поиска
     print_search_res(res);
-
-    // // Заполнение поля session
-    // printf("session:");
-    // command = get_int();
-
-    // // Заполнение поля price
-    // printf("price:");
-    // f.price = get_int();
-
-    // // Заполнение поля num_viewers
-    // printf("num of viewers:");
-    // f.num_of_viewers = get_int();
-    // }
-
-    // char name[NAME_LENGTH];
-    // int session;
-    // int price;
-    // int num_of_viewers;
 }
 
 // Функция выводит на экран список команд для выбора поля, по которуму будет осуществлёт поиск
@@ -300,6 +326,32 @@ int get_int() {
     // Преобразуем полученные массив символов в число типа int 
 	int value = atoi(strValue);
 	return value;
+}
+
+// Функция добавляет элемент списка после указанного 
+void add_after(List **ppAdded, List **ppEnd) {
+   
+    // Проверка, не собираемся ли мы добавить новый элемент после последнего
+    if((*ppAdded) == (*ppEnd)) {
+        printf("to end...\n");
+        add_to_end(&(*ppEnd));
+        return; 
+    }
+
+    // Добавляем элемент после найденного
+    Film new_film;
+    // Заполнение структуры данными
+    new_film = fill_film_data();
+
+    // Создание нового элемента
+    List *new_element = malloc(sizeof(List));
+    // Заполнение структуры данными
+    (*new_element).next = (*ppAdded)->next; 
+    (*new_element).data = new_film; // Заполняем элемент списка данными о фильме
+
+    // Говорим, что теперь указатель на следующий элемент (у структуры, которую мы нашли)
+    // будет указывать на только что созданный элемент
+    (*ppAdded)->next = new_element; 
 }
 
 // Функция добавляет новый элемент в конец списка
