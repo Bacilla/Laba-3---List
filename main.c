@@ -30,6 +30,10 @@ void print_all_data(List *start_p);
 void show_commands();
 void remove_end(List **ppStart, List **ppEnd);
 void remove_front(List **ppStart, List **ppEnd);
+void search_struct(List *pStart, List **ppFound);
+void print_search_res(int res);
+void print_search_fields();
+
 
 
 
@@ -38,8 +42,9 @@ int main() {
     List *pStart = NULL;
     // Указатель на последний элемент списка (он всегда будет смещаться по мере добавления или удаления элементов)
     List *pEnd = NULL;
- 
+
     show_commands();
+    
     // Main loop
     while(1) { 
         printf("\ninput your command: ");
@@ -72,7 +77,13 @@ int main() {
                 remove_front(&pStart, &pEnd);
                 break;
             case 5:
-                printf("not ready...\n");
+                List *pFound = NULL;
+                printf("search_struct in progress...\n");
+                search_struct(pStart, &pFound);
+                if(pFound != NULL) {
+                    // делаем следующие действия: вставляем элемент после надйенной или удаляем найденную..
+                }
+
                 break;
             case 6:
                 print_all_data(pStart);
@@ -162,7 +173,122 @@ void remove_front(List **ppStart, List **ppEnd) {
     *ppStart = temp;
 }
 
+void search_struct(List *pStart, List **ppFound) {
+    // Вывод список возможных полей для поиска
+    print_search_fields();
+    
+    printf("command:");
+    // Ввод и обработка команды
+    int command = get_int();
+    if(command < 1 || command > 4) {
+        printf("Incorrect command.\n");
+        return;
+    }
 
+    
+    int res = 0; // Найдено: 1, не найдено: 0
+    List *temp; // Временный указатель на элемент списка
+    switch (command) {
+        // Поиск по полю film name
+        case 1:
+            printf("film name:");
+            char name[NAME_LENGTH] = {0};
+            if(fgets(name, NAME_LENGTH, stdin) == NULL) {
+                printf("In \"search_struct\" function: Error in fgets()\n");
+            }
+            // Удаление символа '\n' из полученной строки
+            for(int i = 0; i < NAME_LENGTH; i++) {
+                if(name[i] == '\n') {
+                    name[i] = '\0';
+                    break;
+                }
+            }
+
+            // Поиск строки в полях структурных переменных списка
+            temp = pStart;
+            while(temp != NULL) {
+                if(strcmp(name, temp->data.name) == 0) {
+                    *ppFound = temp; // сохраняем указатель на найденный элемент списка
+                    res = 1;
+                    break;
+                }
+                temp = temp->next;
+            }
+            break;
+        // Поиск по полю session    
+        case 2:
+            printf("session:");
+            int session_val = get_int();
+            
+            // Поиск введённого значения
+            temp = pStart;
+            while(temp != NULL) {
+                if(temp->data.session == session_val) {
+                    res = 1;
+                    break;
+                }
+                temp = temp->next;
+            }
+            break;
+        // Поиск по полю price      
+        case 3:
+            printf("price:");
+            int price_val = get_int();
+            
+            // Поиск введённого значения
+            temp = pStart;
+            while(temp != NULL) {
+                if(temp->data.price == price_val) {
+                    res = 1;
+                    break;
+                }
+                temp = temp->next;
+            }
+            break;
+        // Поиск по полю num of viewers
+        case 4:
+            break;
+    }
+
+    // вывод сообщения о результатах поиска
+    print_search_res(res);
+
+    // // Заполнение поля session
+    // printf("session:");
+    // command = get_int();
+
+    // // Заполнение поля price
+    // printf("price:");
+    // f.price = get_int();
+
+    // // Заполнение поля num_viewers
+    // printf("num of viewers:");
+    // f.num_of_viewers = get_int();
+    // }
+
+    // char name[NAME_LENGTH];
+    // int session;
+    // int price;
+    // int num_of_viewers;
+}
+
+// Функция выводит на экран список команд для выбора поля, по которуму будет осуществлёт поиск
+void print_search_fields() {
+    printf("search field:\n");
+    printf("\"1\": film name\n");
+    printf("\"2\": session\n");
+    printf("\"3\": price\n");
+    printf("\"4\": viewers\n");
+}
+
+// Функция выводит сообщение о результате поиска
+void print_search_res(int res) {
+    if(res == 0) {
+        printf("the search failed!\n");
+    } else {
+        printf("the search was successful!\n");
+    }
+}
 
 // Функция получает от пользователя число типа int 
 int get_int() {
