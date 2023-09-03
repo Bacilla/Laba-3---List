@@ -20,11 +20,6 @@ struct SList {
 };
 
 
-// Функция выводит на экран информацию о конкретной структуре(Film)
-void print_film_data() {
-
-}
-
 // Прототипы функций
 int get_int();
 void add_to_end(List **ppEnd);
@@ -32,6 +27,7 @@ void add_first(List **ppStart, List **ppEnd);
 void add_to_front(List **ppStart);
 Film fill_film_data();
 void print_all_data(List *start_p);
+void show_commands();
 
 
 int main() {
@@ -40,15 +36,48 @@ int main() {
     // Указатель на последний элемент списка (он всегда будет смещаться по мере добавления или удаления элементов)
     List *pEnd = NULL;
  
-    // Тесты
-    add_first(&pStart, &pEnd);
-    add_to_end(&pEnd);
+    show_commands();
+    // Main loop
+    while(1) { 
+        printf("\ninput your command: ");
+        int command = get_int();
+        switch (command) {
+            case 1:
+                if(pEnd == NULL && pStart == NULL) {
+                    printf("add_first in progress...\n");
+                    add_first(&pStart, &pEnd);
+                } else {
+                    printf("add_to_end in progress...\n");
+                    add_to_end(&pEnd);
+                }
+                break;
+            case 2:
+                if(pEnd == NULL && pStart == NULL) {
+                    printf("add_first in progress...\n");
+                    add_first(&pStart, &pEnd);
+                } else {
+                    printf("add_to_front in progress...\n");
+                    add_to_front(&pStart);
+                }
+                break;
+            case 3:
+                printf("not ready...\n");
+                break;
+            case 4:
+                printf("not ready...\n");
+                break;
+            case 5:
+                printf("not ready...\n");
+                break;
+            case 6:
+                print_all_data(pStart);
+                break;
+            case 7:
+                printf("goodbye ^W^\n");
+                exit(0);
+        }
 
-    print_all_data(pStart);
-
-    add_to_front(&pStart);
-
-    print_all_data(pStart);
+    }
 
 
     return 0;
@@ -128,7 +157,7 @@ Film fill_film_data() {
     Film f;
 
     // Заполнение поля name
-    printf("name:");// scanf("%s", &new_film.name);
+    printf("film name:");// scanf("%s", &new_film.name);
     char name[NAME_LENGTH] = {0};
     if(fgets(name, NAME_LENGTH + 1, stdin) == NULL) {
         printf("In \"fill_film_data\" function: Error in fgets()\n");
@@ -164,7 +193,7 @@ void print_all_data(List *pStart) {
     printf("--START OF THE LIST--\n");
     while(temp != NULL) {
         printf("\tElement %d:\n", i);
-        printf("name:\t\t%s\n", (*temp).data.name);
+        printf("film name:\t%s\n", (*temp).data.name);
         printf("session:\t%d\n", (*temp).data.session);
         printf("price:\t\t%d\n", (*temp).data.price);
         printf("viewers:\t%d\n", (*temp).data.num_of_viewers);
@@ -172,4 +201,17 @@ void print_all_data(List *pStart) {
         i++;
     }
     printf("---END OF THE LIST---\n");
+}
+
+// Функция показывает все возможные команды
+void show_commands() {
+    printf("Commands:\n");
+    printf("\"1\": add to the end\n");
+    printf("\"2\": add to the front\n");
+    printf("\"3\": delete from the end\n");
+    printf("\"4\": delete from the front\n");
+    printf("\"5\": element search\n");
+    printf("\"6\": print all elements\n");
+    printf("\"7\": exit\n");
+    printf("\n");
 }
