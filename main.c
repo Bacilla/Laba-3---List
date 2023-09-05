@@ -12,7 +12,7 @@ typedef struct {
     int num_of_viewers;
 } Film;
 
-// Структура элемента односвязного списка
+// Структура элемента двусвязного списка
 typedef struct SList List;
 struct SList {
     List *next;
@@ -31,7 +31,7 @@ Film fill_film_data();
 void show_commands();
 void remove_end(List **ppStart, List **ppEnd);
 void remove_front(List **ppStart, List **ppEnd);
-void remove_found(List **ppFound, List **ppPrev);
+void remove_found(List **ppFound);
 void search_struct(List *pStart, List **ppFound);
 void print_search_res(int res);
 void print_search_fields();
@@ -117,11 +117,8 @@ int main() {
                             remove_end(&pStart, &pEnd);
                             break;
                         }
-                        
-                        // Находим предыдущий от найденного элемента
-                        List *pPrev = find_prev(pFound, pStart);
                         // Если элемент не является ни первым, ни последним в списке
-                        remove_found(&pFound, &pPrev); // удаление найденного элемента
+                        remove_found(&pFound); // удаление найденного элемента
                         break;
                 }
                 break;
@@ -201,8 +198,15 @@ List *find_prev(List *pFound, List *pStart) {
 }
 
 // Функция удаляет найденный элемент
-void remove_found(List **ppFound, List **ppPrev) {
-    (*ppPrev)->next = (*ppFound)->next;
+void remove_found(List **ppFound) {
+    // Соединяем следующий элемент от найденного с предыдущим элементом от найденного
+    List *temp = (*ppFound)->next;
+    temp->prev = (*ppFound)->prev;
+
+    // Соединяем предыдущий элемент от найденного со следующим элементом от найденного
+    temp = (*ppFound)->prev;
+    temp->next = (*ppFound)->next;
+
     free(*ppFound);
 } 
 
@@ -334,8 +338,7 @@ int get_int() {
 }
 
 // Функция добавляет элемент списка после указанного 
-void add_after(List **ppAdded, List **ppEnd) {
-   
+void add_after(List **ppAdded, List **ppEnd) { 
     // Проверка, не собираемся ли мы добавить новый элемент после последнего
     if((*ppAdded) == (*ppEnd)) {
         printf("to end...\n");
@@ -351,7 +354,8 @@ void add_after(List **ppAdded, List **ppEnd) {
     // Создание нового элемента
     List *new_element = malloc(sizeof(List));
     // Заполнение структуры данными
-    (*new_element).next = (*ppAdded)->next; 
+    (*new_element).next = (*ppAdded)->next;
+    (*new_element).prev = (*ppAdded); 
     (*new_element).data = new_film; // Заполняем элемент списка данными о фильме
 
     // Говорим, что теперь указатель на следующий элемент (у структуры, которую мы нашли)
