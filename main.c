@@ -16,6 +16,7 @@ typedef struct {
 typedef struct SList List;
 struct SList {
     List *next;
+    List *prev;
     Film data;
 };
 
@@ -141,75 +142,46 @@ int main() {
 
 // Функция удаляет последний элемент с конца списка
 void remove_end(List **ppStart, List **ppEnd) {
-    List *temp = *ppStart; // Копируем указатель на первый элемент в структуре
-    if((temp) == NULL) { // Если список пустой - выходим из функции
+    if((*ppEnd) == NULL) { // Если список пустой - выходим из функции
         printf("Error, List is empty.\n");
         return;
     }
-    
-    int i = 0; // счетчик количества элементов в списке
-    // Находим кол-во элементов в списке
-    while(temp != NULL) {
-        temp = (*temp).next;
-        i++;
+  
+    // Если указатели первого и последнего элемента списка указывают 
+    // на один и тот же элемент, значит список имеет всего один элемент
+    if((*ppEnd) == (*ppStart)) {
+        free(*ppEnd); // В данном случае очищается по факту и *ppStart, т.к. они указывают на один объект
+        *ppEnd = NULL;
+        *ppStart = NULL;
+        return;
     }
 
-    // Для теста 
-    printf("num of elements: %d\n", i);
-
-    temp = *ppStart; // Перед вторым проходом обновляем временный указатель, чтобы он опять указывал на первый элемент в списке
-    int j = 1; // Счетчик второго прохода по элементам
-    while(1) {
-        if(i == 1) { // Частный случай, когда в списке находится лишь один элемент
-            free(*ppEnd); // очищаем последний (и единственный) элемент 
-            // Возвращаем список в нулевое положение (когда нет ни одного элемента и указатела на 1й и последний элементы == NULL)
-            *ppEnd = NULL;
-            *ppStart = NULL;
-            break;
-        }
-        if(j == i - 1) { // j находит предпоследний элемент в списке(который послед удаления последнего станет новым последним элементом)
-            free(*ppEnd); // очищаем последний элемент
-            *ppEnd = temp; // указываем на новый последний элемент
-            (*ppEnd)->next = NULL;
-            break;
-        }
-        temp = (*temp).next;
-        j++;
-    }
+    // Кейс когда в списке есть 2+ элементов
+    *ppEnd = (*ppEnd)->prev; // передвигаем указатель на новый последний элемент
+    free((*ppEnd)->next); 
+    (*ppEnd)->next = NULL;
 }
 
-// Функция удаляем первый элемент из начала списка
+// Функция удаляет первый элемент из начала списка
 void remove_front(List **ppStart, List **ppEnd) {
-    List *temp = *ppStart;
-    if((temp) == NULL) { // Если список пустой - выходим из функции
+    // Если список пустой - выходим из функции
+    if((*ppStart) == NULL) { 
         printf("Error, List is empty.\n");
         return;
     }
 
-
-    // В данной функции нет необходимости значть кол-во элементов в списке, но используется исключительно для наглядности
-    int i = 0; // счетчик количества элементов в списке
-    // Находим кол-во элементов в списке
-    while(temp != NULL) {
-        temp = (*temp).next;
-        i++;
-    }
-    // Для теста 
-    printf("num of elements: %d\n", i);
-
-
-    // Если в списке находится один элемент
-    if((*ppStart)->next == NULL) {
+    // Случай, когда в списке один элемент
+    if((*ppEnd) == (*ppStart)) {
         free(*ppStart);
         *ppStart = NULL;
         *ppEnd = NULL;
         return;
     }
 
-    // Если в списке больше одного элемента
-    temp = (*ppStart)->next; // Запоминаем указатель на следующий после первого элемент
-    free(*ppStart);
-    *ppStart = temp;
+    // Кейс когда в списке есть 2+ элементов
+    *ppStart = (*ppStart)->next;
+    free((*ppStart)->prev); 
+    (*ppStart)->prev = NULL;
 }
 
 // Функция находит предыдущий, перед найденным, элемент
@@ -398,6 +370,7 @@ void add_to_end(List **ppEnd) {
     List *new_element = malloc(sizeof(List));
     // Заполнение структуры данными
     (*new_element).next = NULL; // Т.к. элемент добавляется в конец списка
+    (*new_element).prev = (*ppEnd); 
     (*new_element).data = new_film; // Заполняем элемент списка данными о фильме
  
     // Cвязываем бывший последний элемент с новым последним элементом
@@ -417,7 +390,8 @@ void add_first(List **ppStart, List **ppEnd) {
     // Создание нового элемента
     List *new_element = malloc(sizeof(List));
     // Заполнение структуры данными
-    (*new_element).next = NULL; 
+    (*new_element).next = NULL;
+    (*new_element).prev = NULL; 
     (*new_element).data = new_film;
 
     // Т.к. добавляется первый элемент в списке - указатели на начало списка и конец это один объект
@@ -436,7 +410,11 @@ void add_to_front(List **ppStart) {
     List *new_element = malloc(sizeof(List));
     // Заполнение структуры данными
     (*new_element).next = *ppStart; // Указывает на бывший первый элемент в списке
+    (*new_element).prev = NULL;
     (*new_element).data = new_film;
+
+    // говорим что теперь указател на предыдущий элемент (у бывшего первого элемента) указывает на новый элемент
+    (*ppStart)->prev = new_element; 
 
     // Переприсваиваем указатель на новый первый элемент 
     *ppStart = new_element;
